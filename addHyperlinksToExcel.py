@@ -48,9 +48,17 @@ def main():
     wb = openpyxl.load_workbook(filename)
     sheet = wb.active
 
-    row_offset_from_term_moed = {
-        'Winter': {'A': 0, 'B': 1},
-        'Spring': {'A': 2, 'B': 3},
+    # row_offset_from_term_moed = {
+    #     'Winter': {'A': 0, 'B': 1},
+    #     'Spring': {'A': 2, 'B': 3},
+    # }
+    heb_term_to_eng = {
+        "חורף": 'Winter',
+        "אביב": 'Spring',
+    }
+    heb_moed_to_eng = {
+        "א": 'A',
+        "ב": 'B',
     }
 
     # Fill in missing data
@@ -64,10 +72,12 @@ def main():
         if row[0].value == None:
             not_found_count += 1
             for i in range(2):
-                row[i].value = last_row[i].value
-                row[i].style = last_row[i].style
-                row[i]._style = last_row[i]._style
-                continue
+                if row[i].value == None:
+                    row[i].value = last_row[i].value
+                    row[i]._style = last_row[i]._style
+
+            last_row = row
+            continue
 
         not_found_count = 0
         last_row = row
@@ -83,21 +93,19 @@ def main():
             url = f'{pathname2url(path[2:])}'
 
             year, semester, moed, is_sol = ret
-            cell_value = moed + (" Sol" if is_sol else "")
+            cell_value = "Moed " + moed + (" Sol" if is_sol else "")
             # cell_value = f'=HYPERLINK("{url}", "'+(moed + " Sol" if is_sol else "") + '")'
             year = int(year)
             #  Find the cell with `year`
-            for row in sheet.iter_rows():
-                if row[0].value == year:
-                    link_cell_row = row[0].row + \
-                        row_offset_from_term_moed[semester][moed]
+            for row in sheet.iter_rows(min_row=FIRST_DATA_ROW):
+                if row[0].value == year and \
+                    row[1].value and heb_term_to_eng[row[1].value] == semester and \
+                        row[2].value and heb_moed_to_eng[row[2].value] == moed:
                     link_cell_col = 5 if is_sol else 3
-                    link_cell = sheet[link_cell_row][link_cell_col]
+                    link_cell = row[link_cell_col]
                     link_cell.value = cell_value
-                    link_cell.hyperlink = url
+                    link_cell.hyperlink = path[2:]
                     link_cell.style = 'Hyperlink'
-                    # Put todo (" ") value in the "done" cell
-                    sheet[link_cell_row][4].value = ' '
                     # Excel conditional formatting number > 2015
                     conditional_formula = '=IF(AND(ISNUMBER(A{row}),A{row}>2015),"",A{row})'
 

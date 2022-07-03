@@ -27,6 +27,7 @@ def path_to_year_semester_moed_is_solution(path):
         path = path.replace('מועד', 'Moed')
         path = path.replace('א', 'A')
         path = path.replace('ב', 'B')
+        path = path.replace('פתרון', 'Solution')
 
         moed = re.search(
             r'(Moed.?|/|Exam|\d\d|Maman)([AB])', path, re.IGNORECASE).group(2).upper()

@@ -1,3 +1,9 @@
+# What's New - 12th of Jul 2022?
+ - Add requirements file
+ - Add support for Moed C
+ - Add partial support for exams in 2 parts
+ - If a solution doesn't exist locally, it will try linking to a scan from tscans (index doesn't update automatically for now)
+
 # Overview
 
 If you just want to track your own exams, open the `examsLinks.xlsx` and use the markers to update 
